@@ -1,0 +1,26 @@
+{
+  "name": "SUIVI POMPAGE GPL – SAPET Energy",
+  "short_name": "POMPAGE GPL",
+  "description": "Calcul des volumes reçus lors du pompage GPL – Terminal Abidjan SAPET",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1A3C5E",
+  "theme_color": "#1A3C5E",
+  "lang": "fr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["utilities", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nouveau calcul",
+      "short_name": "Calcul",
+      "description": "Démarrer un calcul de volume",
+      "url": "./index.html#calcul",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

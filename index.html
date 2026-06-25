@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A3C5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SUIVI POMPAGE – SAPET GPL</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --blue:#1A3C5E;--blue-light:#2E6DA4;--blue-bg:#D6E4F0;
+  --green:#1E7D3C;--green-bg:#EAF3DE;
+  --orange:#E8A020;--orange-bg:#FFF3DC;
+  --red:#C00000;--red-bg:#FDEAEA;
+  --grey:#F4F6F9;--border:#D0D8E4;
+  --text:#1A1A1A;--text2:#555;
+  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#f0f4f8;color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--blue);color:#fff;padding:12px 16px;
+  display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.topbar-logo{font-size:22px;}
+.topbar-title{flex:1;}
+.topbar-title h1{font-size:16px;font-weight:600;letter-spacing:.3px;}
+.topbar-title p{font-size:11px;opacity:.75;margin-top:1px;}
+.topbar-date{font-size:11px;opacity:.7;text-align:right;}
+
+/* ── NAV TABS ── */
+.nav{display:flex;background:#fff;border-bottom:2px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;position:sticky;top:60px;z-index:99;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:1;min-width:80px;padding:10px 6px;font-size:12px;font-weight:500;
+  color:var(--text2);background:none;border:none;cursor:pointer;
+  border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-btn.active{color:var(--blue);border-bottom-color:var(--orange);font-weight:600;}
+.nav-btn span{display:block;font-size:18px;margin-bottom:2px;}
+
+/* ── PAGES ── */
+.page{display:none;padding:16px;max-width:600px;margin:0 auto;}
+.page.active{display:block;}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-bottom:16px;overflow:hidden;}
+.card-header{background:var(--blue);color:#fff;padding:12px 16px;
+  font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.card-header.green{background:var(--green);}
+.card-header.orange{background:var(--orange);color:#1A1A1A;}
+.card-header.red{background:var(--red);}
+.card-body{padding:16px;}
+
+/* ── SPHERE SELECTOR ── */
+.sphere-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.sphere-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:10px;
+  background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+  text-align:center;color:var(--text2);}
+.sphere-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* ── INPUT GROUPS ── */
+.field-group{margin-bottom:14px;}
+.field-label{font-size:12px;font-weight:600;color:var(--blue);margin-bottom:5px;
+  display:flex;align-items:center;gap:5px;}
+.field-label .unit{font-weight:400;color:var(--text2);font-size:11px;}
+.field-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:16px;background:#fff;color:var(--text);
+  transition:border-color .2s;appearance:none;}
+.field-input:focus{outline:none;border-color:var(--blue);}
+.field-input.readonly{background:var(--grey);color:var(--blue);font-weight:600;}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* ── RESULT BOX ── */
+.result-box{background:var(--blue);border-radius:var(--radius);
+  padding:16px;color:#fff;margin-top:16px;}
+.result-box h3{font-size:12px;opacity:.8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.result-row{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15);}
+.result-row:last-child{border:none;}
+.result-label{font-size:13px;opacity:.85;}
+.result-value{font-size:18px;font-weight:700;}
+.result-value.big{font-size:24px;color:var(--orange);}
+.result-value.green{color:#6ee77e;}
+.result-value.red{color:#ff8a8a;}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;
+  font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.2px;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:active{background:var(--blue-light);}
+.btn-orange{background:var(--orange);color:#1A1A1A;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-outline{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+.btn-sm{padding:8px 14px;width:auto;font-size:13px;}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.kpi-card{background:#fff;border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);text-align:center;}
+.kpi-card .kpi-val{font-size:22px;font-weight:700;color:var(--blue);margin:4px 0;}
+.kpi-card .kpi-lab{font-size:11px;color:var(--text2);}
+.kpi-card .kpi-icon{font-size:20px;margin-bottom:4px;}
+
+/* ── HISTORY LIST ── */
+.history-item{background:#fff;border-radius:10px;margin-bottom:10px;
+  padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08);cursor:pointer;}
+.history-item:active{background:var(--grey);}
+.history-item .hi-head{display:flex;justify-content:space-between;align-items:center;}
+.history-item .hi-date{font-size:12px;color:var(--text2);}
+.history-item .hi-vol{font-size:18px;font-weight:700;color:var(--blue);}
+.history-item .hi-detail{font-size:12px;color:var(--text2);margin-top:6px;}
+.history-item .hi-badge{display:inline-block;background:var(--blue-bg);
+  color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;}
+
+/* ── PROGRESS / VCF ── */
+.vcf-display{background:var(--orange-bg);border:1.5px solid var(--orange);
+  border-radius:10px;padding:12px;margin:12px 0;text-align:center;}
+.vcf-display .vcf-val{font-size:28px;font-weight:700;color:var(--blue);}
+.vcf-display .vcf-lab{font-size:12px;color:var(--text2);}
+
+/* ── INFO BANNER ── */
+.info-banner{background:var(--blue-bg);border-left:4px solid var(--blue);
+  border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px;font-size:12px;
+  color:var(--blue);line-height:1.5;}
+.warn-banner{background:var(--orange-bg);border-left:4px solid var(--orange);
+  border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px;font-size:12px;
+  color:#7a4800;line-height:1.5;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1A3C5E;color:#fff;padding:12px 20px;border-radius:30px;font-size:14px;
+  font-weight:500;z-index:999;transition:transform .3s;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:200;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;
+  max-width:600px;max-height:80vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;
+  margin:0 auto 16px;}
+.modal-title{font-size:16px;font-weight:700;color:var(--blue);margin-bottom:16px;}
+
+/* ── DIVIDER ── */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;}
+.toggle-label{font-size:13px;color:var(--text);}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:12px;
+  transition:.3s;}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;
+  background:#fff;border-radius:50%;bottom:3px;left:3px;transition:.3s;}
+.toggle input:checked + .toggle-slider{background:var(--green);}
+.toggle input:checked + .toggle-slider:before{transform:translateX(20px);}
+
+/* ── FORMULA BOX ── */
+.formula-box{background:var(--grey);border-radius:8px;padding:10px 14px;
+  font-family:monospace;font-size:12px;color:var(--blue);margin:8px 0;}
+
+/* ── STEP INDICATOR ── */
+.steps{display:flex;align-items:center;gap:6px;margin-bottom:20px;}
+.step{width:28px;height:28px;border-radius:50%;background:var(--border);
+  color:var(--text2);font-size:13px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;}
+.step.active{background:var(--blue);color:#fff;}
+.step.done{background:var(--green);color:#fff;}
+.step-line{flex:1;height:2px;background:var(--border);}
+.step-line.done{background:var(--green);}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:40px 20px;color:var(--text2);}
+.loading .spin{font-size:32px;animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">⛽</div>
+  <div class="topbar-title">
+    <h1>SUIVI POMPAGE GPL</h1>
+    <p>SAPET Energy – Terminal Abidjan</p>
+  </div>
+  <div class="topbar-date" id="topDate"></div>
+</div>
+
+<!-- NAV TABS -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('calcul')">
+    <span>🧮</span>Calcul
+  </button>
+  <button class="nav-btn" onclick="showPage('vcf')">
+    <span>📊</span>Table 54E
+  </button>
+  <button class="nav-btn" onclick="showPage('historique')">
+    <span>📋</span>Historique
+  </button>
+  <button class="nav-btn" onclick="showPage('bilan')">
+    <span>📈</span>Bilan
+  </button>
+  <button class="nav-btn" onclick="showPage('infos')">
+    <span>ℹ️</span>Guide
+  </button>
+</nav>
+
+<!-- ═══ PAGE CALCUL ═══ -->
+<div id="page-calcul" class="page active">
+
+  <div class="card">
+    <div class="card-header">🛢️ Sélection de la Sphère</div>
+    <div class="card-body">
+      <div class="sphere-tabs">
+        <button class="sphere-btn active" onclick="selectSphere('SP1')">S01</button>
+        <button class="sphere-btn" onclick="selectSphere('SP2')">S02</button>
+        <button class="sphere-btn" onclick="selectSphere('SP3')">S03</button>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Densité navire (produit reçu) <span class="unit">kg/L</span></div>
+        <input class="field-input" type="number" id="densiteNavire" 
+          value="0.5767" step="0.0001" min="0.4" max="0.72"
+          oninput="onInputChange()">
+      </div>
+    </div>
+  </div>
+
+  <!-- AVANT POMPAGE -->
+  <div class="card">
+    <div class="card-header">📉 AVANT Pompage/Transfert</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">🔵 Hauteur liquide <span class="unit">mm</span></div>
+          <input class="field-input" type="number" id="avHautL" placeholder="ex: 10586"
+            min="0" max="25000" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">🔵 Hauteur gaz <span class="unit">mm</span></div>
+          <input class="field-input" type="number" id="avHautG" placeholder="ex: 14217"
+            min="0" max="25000" oninput="onInputChange()">
+        </div>
+      </div>
+      <div class="row3">
+        <div class="field-group">
+          <div class="field-label">Température <span class="unit">°C</span></div>
+          <input class="field-input" type="number" id="avTemp" placeholder="25.94"
+            step="0.01" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Densité 15° <span class="unit">kg/L</span></div>
+          <input class="field-input" type="number" id="avDens15" placeholder="0.5795"
+            step="0.0001" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Pr. relative <span class="unit">bar</span></div>
+          <input class="field-input" type="number" id="avPressRel" placeholder="1.804"
+            step="0.001" oninput="onInputChange()">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Volume liq. <span class="unit">m³</span></div>
+          <input class="field-input readonly" type="text" id="avVolL" readonly>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Poids liq. <span class="unit">T</span></div>
+          <input class="field-input readonly" type="text" id="avPoids" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APRÈS POMPAGE -->
+  <div class="card">
+    <div class="card-header green">📈 APRÈS Pompage/Transfert</div>
+    <div class="card-body">
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">🟢 Hauteur liquide <span class="unit">mm</span></div>
+          <input class="field-input" type="number" id="apHautL" placeholder="ex: 18430"
+            min="0" max="25000" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">🟢 Hauteur gaz <span class="unit">mm</span></div>
+          <input class="field-input" type="number" id="apHautG" placeholder="ex: 6373"
+            min="0" max="25000" oninput="onInputChange()">
+        </div>
+      </div>
+      <div class="row3">
+        <div class="field-group">
+          <div class="field-label">Température <span class="unit">°C</span></div>
+          <input class="field-input" type="number" id="apTemp" placeholder="21.61"
+            step="0.01" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Densité 15° <span class="unit">kg/L</span></div>
+          <input class="field-input" type="number" id="apDens15" placeholder="0.5780"
+            step="0.0001" oninput="onInputChange()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Pr. relative <span class="unit">bar</span></div>
+          <input class="field-input" type="number" id="apPressRel" placeholder="1.552"
+            step="0.001" oninput="onInputChange()">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Volume liq. <span class="unit">m³</span></div>
+          <input class="field-input readonly" type="text" id="apVolL" readonly>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Poids liq. <span class="unit">T</span></div>
+          <input class="field-input readonly" type="text" id="apPoids" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div id="resultBlock" style="display:none">
+    <div class="result-box">
+      <h3>🚢 Volume Reçu – <span id="resSphereName">SP1</span></h3>
+      <div class="result-row">
+        <span class="result-label">Volume ambiant (ΔHauteur → barème)</span>
+        <span class="result-value" id="resVolAmb">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">VCF (Table 54E interpolé)</span>
+        <span class="result-value" id="resVCF">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Volume à 15°C</span>
+        <span class="result-value" id="resVol15">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Densité à température</span>
+        <span class="result-value" id="resDensT">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label" style="font-weight:700">📦 VOLUME REÇU (m³)</span>
+        <span class="result-value big" id="resVolRecu">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label" style="font-weight:700">⚖️ TONNAGE REÇU (T)</span>
+        <span class="result-value big" id="resTonnage">—</span>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="row2">
+      <button class="btn btn-green" onclick="saveResult()">💾 Enregistrer</button>
+      <button class="btn btn-outline" onclick="resetForm()">🔄 Réinitialiser</button>
+    </div>
+  </div>
+
+  <div id="calcInfo" class="info-banner" style="display:none">
+    ⚠️ Renseigner les hauteurs avant et après pompage pour calculer le volume reçu.
+  </div>
+</div>
+
+<!-- ═══ PAGE TABLE 54E ═══ -->
+<div id="page-vcf" class="page">
+  <div class="card">
+    <div class="card-header orange">📊 Table 54E – VCF NGL/LPG → 15°C</div>
+    <div class="card-body">
+      <div class="info-banner">
+        Facteur de Correction de Volume (VCF) pour convertir le volume ambiant en volume à 15°C selon la densité à 15°C et la température de mesure.
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Densité à 15°C <span class="unit">kg/L</span></div>
+          <input class="field-input" type="number" id="vcfDens" value="0.58"
+            step="0.001" min="0.40" max="0.715" oninput="computeVCF()">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Température <span class="unit">°C</span></div>
+          <input class="field-input" type="number" id="vcfTemp" value="25.0"
+            step="0.1" min="-46" max="94" oninput="computeVCF()">
+        </div>
+      </div>
+      <div class="vcf-display">
+        <div class="vcf-lab">Facteur VCF (interpolé bilinéaire)</div>
+        <div class="vcf-val" id="vcfResult">—</div>
+      </div>
+      <div class="formula-box" id="vcfFormula"></div>
+      <hr class="divider">
+      <div class="field-group">
+        <div class="field-label">Volume ambiant mesuré <span class="unit">m³</span></div>
+        <input class="field-input" type="number" id="vcfVolAmb" placeholder="ex: 3559.15"
+          step="0.01" oninput="computeVCF()">
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Volume à 15°C <span class="unit">m³</span></div>
+          <input class="field-input readonly" type="text" id="vcfVol15" readonly>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Poids <span class="unit">T</span></div>
+          <input class="field-input readonly" type="text" id="vcfPoids" readonly>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barème lookup -->
+  <div class="card">
+    <div class="card-header">📏 Consultation Barème Sphère</div>
+    <div class="card-body">
+      <div class="sphere-tabs">
+        <button class="sphere-btn active" onclick="selectBarSphere('SP1',this)">S01</button>
+        <button class="sphere-btn" onclick="selectBarSphere('SP2',this)">S02</button>
+        <button class="sphere-btn" onclick="selectBarSphere('SP3',this)">S03</button>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Hauteur liquide <span class="unit">mm</span></div>
+        <input class="field-input" type="number" id="barHeight" placeholder="ex: 10586"
+          min="0" max="25000" oninput="lookupBareme()">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Volume correspondant <span class="unit">m³</span></div>
+        <input class="field-input readonly" type="text" id="barVolume" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE HISTORIQUE ═══ -->
+<div id="page-historique" class="page">
+  <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+    <div style="font-size:13px;font-weight:600;color:var(--blue);flex:1;">
+      Calculs enregistrés
+    </div>
+    <button class="btn btn-sm btn-red" onclick="clearHistory()">🗑️ Tout effacer</button>
+  </div>
+  <div id="historyList"></div>
+  <div id="historyEmpty" class="loading" style="display:none">
+    <div style="font-size:40px;margin-bottom:12px">📋</div>
+    <div>Aucun calcul enregistré</div>
+    <div style="font-size:12px;margin-top:6px;opacity:.7">
+      Effectuez un calcul et appuyez sur "Enregistrer"
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE BILAN ═══ -->
+<div id="page-bilan" class="page">
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">🚢</div>
+      <div class="kpi-val" id="bilNbOps">0</div>
+      <div class="kpi-lab">Opérations enregistrées</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-val" id="bilVolTotal">0 m³</div>
+      <div class="kpi-lab">Volume total reçu</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">⚖️</div>
+      <div class="kpi-val" id="bilTonnTotal">0 T</div>
+      <div class="kpi-lab">Tonnage total reçu</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🛢️</div>
+      <div class="kpi-val" id="bilDernVol">—</div>
+      <div class="kpi-lab">Dernière opération</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📊 Répartition par Sphère</div>
+    <div class="card-body" id="bilParSphere">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:20px 0;">
+        Aucune donnée disponible
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header orange">📤 Exporter les données</div>
+    <div class="card-body">
+      <button class="btn btn-primary" onclick="exportCSV()">📥 Exporter en CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE INFOS ═══ -->
+<div id="page-infos" class="page">
+  <div class="card">
+    <div class="card-header">📖 Méthode de calcul</div>
+    <div class="card-body">
+      <div class="info-banner">
+        Calcul conforme à la procédure SUIVI POMPAGE SAPET basée sur les barèmes S01/S02/S03 et la Table ASTM 54E pour les NGL/LPG.
+      </div>
+      
+      <div style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:8px;">
+        Étapes du calcul
+      </div>
+
+      <div style="font-size:13px;line-height:1.7;color:var(--text);">
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>1.</strong> Lire la hauteur liquide avant et après pompage (mm)
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>2.</strong> Convertir via le barème → Volume ambiant (m³)
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>3.</strong> ΔVolume = Vol après − Vol avant
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>4.</strong> Trouver VCF dans Table 54E (densité 15°C + température)
+        </div>
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+          <strong>5.</strong> Vol à 15°C = ΔVol × VCF
+        </div>
+        <div style="padding:8px 0;">
+          <strong>6.</strong> Poids = Vol à 15°C × Densité navire (kg/L)
+        </div>
+      </div>
+
+      <div class="formula-box" style="margin-top:12px;">
+Poids (T) = ΔVol_ambiant (m³) × VCF × ρ_navire (kg/L)
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">⚙️ À propos</div>
+    <div class="card-body">
+      <div style="font-size:13px;line-height:1.7;color:var(--text2);">
+        <div>Application : <strong>SUIVI POMPAGE GPL v1.0</strong></div>
+        <div>Terminal : <strong>SAPET Energy – Abidjan</strong></div>
+        <div>Barèmes : <strong>S01/S02/S03 – 2025</strong></div>
+        <div>Table VCF : <strong>ASTM Table 54E (NGL/LPG)</strong></div>
+        <div>Résolution barème : <strong>1 mm</strong></div>
+        <div>Plage VCF : <strong>-45.5°C à 94°C / 0.40 à 0.715 kg/L</strong></div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="info-banner">
+        💡 Pour installer sur Android : Menu Chrome → "Ajouter à l'écran d'accueil"
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SCRIPTS -->
+<script src="data.js"></script>
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentSphere = 'SP1';
+let barSphere = 'SP1';
+let history = JSON.parse(localStorage.getItem('suivi_history') || '[]');
+let lastResult = null;
+
+// ── TOP DATE ──────────────────────────────────────────────────────────────────
+function updateDate(){
+  const now = new Date();
+  document.getElementById('topDate').innerHTML =
+    now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) +
+    '<br>' + now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+updateDate();
+setInterval(updateDate, 60000);
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(name==='historique') renderHistory();
+  if(name==='bilan') renderBilan();
+}
+
+// ── SPHERE SELECTION ──────────────────────────────────────────────────────────
+function selectSphere(sp){
+  currentSphere = sp;
+  document.querySelectorAll('#page-calcul .sphere-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.trim().replace('S0','SP')===sp || 
+      b.textContent.trim()===sp.replace('SP','S0'));
+  });
+  document.getElementById('resSphereName').textContent = sp.replace('SP','S0');
+  onInputChange();
+}
+
+function selectBarSphere(sp, btn){
+  barSphere = sp;
+  document.querySelectorAll('#page-vcf .sphere-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  lookupBareme();
+}
+
+// ── STRAPPING LOOKUP ──────────────────────────────────────────────────────────
+function getSphereData(sp){
+  return APP_DATA[sp.toLowerCase()];
+}
+
+function lookupVolume(sp, heightMm){
+  const h = Math.round(parseFloat(heightMm));
+  if(isNaN(h) || h < 0) return null;
+  const tbl = getSphereData(sp);
+  if(!tbl) return null;
+  const v = tbl[h];
+  if(v !== undefined) return v;
+  // Linear interpolation
+  const h0 = Math.floor(h), h1 = Math.ceil(h);
+  const v0 = tbl[h0], v1 = tbl[h1];
+  if(v0 === undefined || v1 === undefined) return null;
+  return v0 + (v1-v0)*(h-h0);
+}
+
+// ── VCF INTERPOLATION ─────────────────────────────────────────────────────────
+function getVCF(dens15, tempC){
+  const vcf = APP_DATA.vcf;
+  const densities = APP_DATA.densities;
+  
+  // Find bounding temperatures
+  const temps = Object.keys(vcf).map(Number).sort((a,b)=>a-b);
+  let t0 = temps.filter(t=>t<=tempC).pop();
+  let t1 = temps.filter(t=>t>tempC).shift();
+  if(t0===undefined) t0 = temps[0];
+  if(t1===undefined) t1 = temps[temps.length-1];
+  
+  // Find bounding densities
+  const d_sorted = [...densities].sort((a,b)=>a-b);
+  let d0 = d_sorted.filter(d=>d<=dens15).pop();
+  let d1 = d_sorted.filter(d=>d>dens15).shift();
+  if(d0===undefined) d0 = d_sorted[0];
+  if(d1===undefined) d1 = d_sorted[d_sorted.length-1];
+
+  const d0s = String(d0), d1s = String(d1);
+  const t0s = String(t0), t1s = String(t1);
+
+  const vcf_t0_d0 = vcf[t0s]?.[d0s];
+  const vcf_t0_d1 = vcf[t0s]?.[d1s];
+  const vcf_t1_d0 = vcf[t1s]?.[d0s];
+  const vcf_t1_d1 = vcf[t1s]?.[d1s];
+
+  if(!vcf_t0_d0||!vcf_t0_d1||!vcf_t1_d0||!vcf_t1_d1) {
+    // Try nearest available
+    const row = vcf[t0s] || vcf[t1s];
+    if(!row) return null;
+    // Find nearest density
+    const dk = Object.keys(row).map(Number).sort((a,b)=>Math.abs(a-dens15)-Math.abs(b-dens15))[0];
+    return row[String(dk)] || null;
+  }
+
+  // Bilinear interpolation
+  const tRange = t1-t0, dRange = d1-d0;
+  const tFrac = tRange>0 ? (tempC-t0)/tRange : 0;
+  const dFrac = dRange>0 ? (dens15-d0)/dRange : 0;
+
+  const vcf_t0 = vcf_t0_d0 + dFrac*(vcf_t0_d1-vcf_t0_d0);
+  const vcf_t1 = vcf_t1_d0 + dFrac*(vcf_t1_d1-vcf_t1_d0);
+  return vcf_t0 + tFrac*(vcf_t1-vcf_t0);
+}
+
+// ── DENSITY AT TEMPERATURE ────────────────────────────────────────────────────
+function getDensityAtTemp(dens15, vcf){
+  // ρ_T = ρ_15 × VCF (approximate relationship for LPG)
+  // More precisely: ρ_T = ρ_15 / VCF  (VCF = ρ_15 / ρ_T means vol expands, density decreases)
+  if(!vcf || vcf<=0) return null;
+  return dens15 / vcf;
+}
+
+// ── MAIN CALCULATION ──────────────────────────────────────────────────────────
+function onInputChange(){
+  const avHL = document.getElementById('avHautL').value;
+  const apHL = document.getElementById('apHautL').value;
+  const avT  = parseFloat(document.getElementById('avTemp').value);
+  const apT  = parseFloat(document.getElementById('apTemp').value);
+  const avD15= parseFloat(document.getElementById('avDens15').value);
+  const apD15= parseFloat(document.getElementById('apDens15').value);
+  const denNavire = parseFloat(document.getElementById('densiteNavire').value);
+
+  // Volume lookup avant
+  const volAv = lookupVolume(currentSphere, avHL);
+  const volAp = lookupVolume(currentSphere, apHL);
+
+  if(volAv !== null){
+    document.getElementById('avVolL').value = volAv.toFixed(3) + ' m³';
+    // VCF avant
+    if(!isNaN(avT) && !isNaN(avD15)){
+      const vcfAv = getVCF(avD15, avT);
+      const densT_av = getDensityAtTemp(avD15, vcfAv);
+      if(densT_av) {
+        const poidsAv = volAv * densT_av;
+        document.getElementById('avPoids').value = poidsAv.toFixed(3) + ' T';
+      }
+    }
+  } else {
+    document.getElementById('avVolL').value = '';
+    document.getElementById('avPoids').value = '';
+  }
+
+  if(volAp !== null){
+    document.getElementById('apVolL').value = volAp.toFixed(3) + ' m³';
+    if(!isNaN(apT) && !isNaN(apD15)){
+      const vcfAp = getVCF(apD15, apT);
+      const densT_ap = getDensityAtTemp(apD15, vcfAp);
+      if(densT_ap) {
+        const poidsAp = volAp * densT_ap;
+        document.getElementById('apPoids').value = poidsAp.toFixed(3) + ' T';
+      }
+    }
+  } else {
+    document.getElementById('apVolL').value = '';
+    document.getElementById('apPoids').value = '';
+  }
+
+  // Full result only when both sides present
+  const canCompute = volAv!==null && volAp!==null && !isNaN(apT) && !isNaN(apD15) && !isNaN(denNavire);
+  document.getElementById('resultBlock').style.display = canCompute ? 'block' : 'none';
+  document.getElementById('calcInfo').style.display = canCompute ? 'none' : 'block';
+
+  if(canCompute){
+    // Delta volume ambiant = après - avant
+    const deltaVol = volAp - volAv;
+    // VCF uses "après" temperature and density (product received properties)
+    const vcfVal = getVCF(apD15, apT);
+    const densT = getDensityAtTemp(apD15, vcfVal);
+    // Volume à 15°C
+    const vol15 = deltaVol * (vcfVal || 1);
+    // Poids = ΔVol × densité navire
+    const poids = deltaVol * denNavire;
+
+    document.getElementById('resVolAmb').textContent = deltaVol.toFixed(3) + ' m³';
+    document.getElementById('resVCF').textContent = vcfVal ? vcfVal.toFixed(6) : 'N/A';
+    document.getElementById('resVol15').textContent = vol15.toFixed(3) + ' m³';
+    document.getElementById('resDensT').textContent = densT ? densT.toFixed(4) + ' kg/L' : 'N/A';
+    document.getElementById('resVolRecu').textContent = deltaVol.toFixed(3) + ' m³';
+    document.getElementById('resTonnage').textContent = poids.toFixed(3) + ' T';
+
+    lastResult = {
+      sphere: currentSphere,
+      avHautL: parseFloat(avHL), apHautL: parseFloat(apHL),
+      volAv: volAv, volAp: volAp, deltaVol: deltaVol,
+      apTemp: apT, apDens15: apD15, denNavire: denNavire,
+      vcf: vcfVal, vol15: vol15, poids: poids,
+      date: new Date().toISOString()
+    };
+  }
+}
+
+// ── VCF PAGE ──────────────────────────────────────────────────────────────────
+function computeVCF(){
+  const d = parseFloat(document.getElementById('vcfDens').value);
+  const t = parseFloat(document.getElementById('vcfTemp').value);
+  const volAmb = parseFloat(document.getElementById('vcfVolAmb').value);
+  
+  if(!isNaN(d) && !isNaN(t)){
+    const vcf = getVCF(d, t);
+    document.getElementById('vcfResult').textContent = vcf ? vcf.toFixed(6) : 'Hors plage';
+    document.getElementById('vcfFormula').textContent = 
+      vcf ? `VCF = ${vcf.toFixed(6)}  (ρ₁₅ = ${d} kg/L, T = ${t}°C)` : 'Valeurs hors plage Table 54E';
+    
+    if(vcf && !isNaN(volAmb)){
+      const v15 = volAmb * vcf;
+      const poids = v15 * d;
+      document.getElementById('vcfVol15').value = v15.toFixed(3) + ' m³';
+      document.getElementById('vcfPoids').value = poids.toFixed(3) + ' T';
+    }
+  }
+}
+
+function lookupBareme(){
+  const h = document.getElementById('barHeight').value;
+  const vol = lookupVolume(barSphere, h);
+  document.getElementById('barVolume').value = vol!==null ? vol.toFixed(6) + ' m³' : '—';
+}
+
+// ── SAVE / HISTORY ────────────────────────────────────────────────────────────
+function saveResult(){
+  if(!lastResult){ showToast('Aucun résultat à enregistrer'); return; }
+  history.unshift({...lastResult, id: Date.now()});
+  localStorage.setItem('suivi_history', JSON.stringify(history));
+  showToast('✅ Calcul enregistré');
+}
+
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  if(history.length===0){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = history.map((h,i) => `
+    <div class="history-item" onclick="showHistoryDetail(${i})">
+      <div class="hi-head">
+        <span class="hi-badge">${h.sphere.replace('SP','S0')}</span>
+        <span class="hi-date">${new Date(h.date).toLocaleDateString('fr-FR',
+          {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+        <div>
+          <div class="hi-vol">${h.deltaVol.toFixed(1)} m³</div>
+          <div class="hi-detail">Vol. reçu ambiant</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hi-vol" style="color:var(--green)">${h.poids.toFixed(1)} T</div>
+          <div class="hi-detail">Tonnage reçu</div>
+        </div>
+      </div>
+      <div class="hi-detail" style="margin-top:6px;">
+        ΔH: ${h.avHautL}→${h.apHautL} mm | T°: ${h.apTemp}°C | ρ15: ${h.apDens15} kg/L
+      </div>
+    </div>
+  `).join('');
+}
+
+function showHistoryDetail(idx){}
+
+function clearHistory(){
+  if(!confirm('Supprimer tout l\'historique ?')) return;
+  history = [];
+  localStorage.removeItem('suivi_history');
+  renderHistory();
+  showToast('Historique effacé');
+}
+
+// ── BILAN ─────────────────────────────────────────────────────────────────────
+function renderBilan(){
+  const n = history.length;
+  const totalVol = history.reduce((s,h)=>s+h.deltaVol,0);
+  const totalT   = history.reduce((s,h)=>s+h.poids,0);
+
+  document.getElementById('bilNbOps').textContent = n;
+  document.getElementById('bilVolTotal').textContent = totalVol.toFixed(1)+' m³';
+  document.getElementById('bilTonnTotal').textContent = totalT.toFixed(1)+' T';
+  document.getElementById('bilDernVol').textContent = n>0 ? history[0].deltaVol.toFixed(1)+' m³' : '—';
+
+  // Per sphere
+  const perSph = {};
+  history.forEach(h=>{
+    if(!perSph[h.sphere]) perSph[h.sphere]={vol:0,t:0,n:0};
+    perSph[h.sphere].vol += h.deltaVol;
+    perSph[h.sphere].t += h.poids;
+    perSph[h.sphere].n++;
+  });
+
+  const bilEl = document.getElementById('bilParSphere');
+  if(Object.keys(perSph).length===0){
+    bilEl.innerHTML='<div style="color:var(--text2);font-size:13px;text-align:center;padding:20px 0;">Aucune donnée</div>';
+    return;
+  }
+  bilEl.innerHTML = Object.entries(perSph).map(([sp,d])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-weight:700;color:var(--blue)">${sp.replace('SP','S0')}</div>
+        <div style="font-size:12px;color:var(--text2)">${d.n} opération(s)</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700">${d.vol.toFixed(1)} m³</div>
+        <div style="font-size:12px;color:var(--green);font-weight:600">${d.t.toFixed(1)} T</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────────────────────────
+function exportCSV(){
+  if(history.length===0){ showToast('Aucune donnée à exporter'); return; }
+  const headers = ['Date','Sphère','H_avant(mm)','H_après(mm)','Vol_avant(m³)',
+    'Vol_après(m³)','ΔVol_ambiant(m³)','VCF','Vol_15°C(m³)','ρ_navire(kg/L)',
+    'Tonnage(T)','T°(°C)','ρ15(kg/L)'];
+  const rows = history.map(h=>[
+    new Date(h.date).toLocaleString('fr-FR'),
+    h.sphere.replace('SP','S0'), h.avHautL, h.apHautL,
+    h.volAv.toFixed(3), h.volAp.toFixed(3), h.deltaVol.toFixed(3),
+    h.vcf ? h.vcf.toFixed(6):'N/A', h.vol15.toFixed(3),
+    h.denNavire, h.poids.toFixed(3), h.apTemp, h.apDens15
+  ].join(';'));
+  const csv = [headers.join(';'), ...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `SUIVI_POMPAGE_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📥 Export CSV téléchargé');
+}
+
+// ── RESET ─────────────────────────────────────────────────────────────────────
+function resetForm(){
+  ['avHautL','avHautG','avTemp','avDens15','avPressRel',
+   'apHautL','apHautG','apTemp','apDens15','apPressRel'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  ['avVolL','avPoids','apVolL','apPoids'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('resultBlock').style.display='none';
+  document.getElementById('calcInfo').style.display='block';
+  lastResult = null;
+  showToast('Formulaire réinitialisé');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+computeVCF();
+document.getElementById('calcInfo').style.display='block';
+
+// Register service worker for offline
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
